@@ -14,6 +14,18 @@ builder.Services.AddScoped<TournamentApp.Application.Interfaces.ITeamService, To
 builder.Services.AddScoped<TournamentApp.Application.Interfaces.IMatchService, TournamentApp.Application.Services.MatchService>();
 builder.Services.AddScoped<TournamentApp.Application.Interfaces.IAuthService, TournamentApp.Application.Services.AuthService>();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 
@@ -45,6 +57,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 

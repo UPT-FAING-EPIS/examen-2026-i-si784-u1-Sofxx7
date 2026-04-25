@@ -26,6 +26,18 @@ public class TeamService : ITeamService
         });
     }
 
+    public async Task<IEnumerable<TeamDto>> GetByUserIdAsync(Guid userId)
+    {
+        var teams = await _repository.FindAsync(t => t.CaptainId == userId || t.Players.Any(p => p.UserId == userId));
+        return teams.Select(t => new TeamDto
+        {
+            Id = t.Id,
+            Name = t.Name,
+            TournamentId = t.TournamentId,
+            CaptainId = t.CaptainId
+        });
+    }
+
     public async Task<TeamDto?> GetByIdAsync(Guid id)
     {
         var t = await _repository.GetByIdAsync(id);

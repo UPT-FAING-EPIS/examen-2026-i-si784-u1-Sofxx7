@@ -1,0 +1,45 @@
+name: Docs and PlantUML Diagram
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+
+jobs:
+  generate_diagram:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create PlantUML file
+        run: |
+          mkdir -p docs
+          cat << 'EOF' > docs/classes.puml
+          @startuml
+          class User {
+            +Guid Id
+            +string Username
+            +string Email
+          }
+          class Tournament {
+            +Guid Id
+            +string Name
+            +DateTime StartDate
+          }
+          class Team {
+            +Guid Id
+            +string Name
+          }
+          class Match {
+            +Guid Id
+            +int Round
+          }
+          Tournament "1" *-- "many" Team
+          Tournament "1" *-- "many" Match
+          @enduml
+          EOF
+      - name: Generate SVG Diagram
+        uses: grassedge/generate-plantuml-action@v1.6
+        with:
+          path: docs/classes.puml
+          message: "Render PlantUML Diagram"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

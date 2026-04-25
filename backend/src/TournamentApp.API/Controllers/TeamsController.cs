@@ -16,12 +16,17 @@ public class TeamsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetByTournament([FromQuery] Guid tournamentId)
+    public async Task<IActionResult> Get([FromQuery] Guid? tournamentId, [FromQuery] Guid? userId)
     {
-        if (tournamentId == Guid.Empty)
-            return BadRequest("tournamentId is required");
+        IEnumerable<TeamDto> teams = new List<TeamDto>();
+        
+        if (tournamentId.HasValue && tournamentId != Guid.Empty)
+            teams = await _teamService.GetByTournamentIdAsync(tournamentId.Value);
+        else if (userId.HasValue && userId != Guid.Empty)
+            teams = await _teamService.GetByUserIdAsync(userId.Value);
+        else
+            return BadRequest("tournamentId or userId is required");
 
-        var teams = await _teamService.GetByTournamentIdAsync(tournamentId);
         return Ok(teams);
     }
 
