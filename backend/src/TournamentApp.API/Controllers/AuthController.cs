@@ -18,15 +18,29 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {
-        var result = await _authService.RegisterAsync(dto);
-        return Ok(result);
+        try 
+        {
+            var result = await _authService.RegisterAsync(dto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
-        var result = await _authService.LoginAsync(dto);
-        if (result == null) return Unauthorized("Invalid email or password.");
-        return Ok(result);
+        try
+        {
+            var result = await _authService.LoginAsync(dto);
+            if (result == null) return Unauthorized($"Credenciales incorrectas para el correo: {dto.Email}");
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+        }
     }
 }

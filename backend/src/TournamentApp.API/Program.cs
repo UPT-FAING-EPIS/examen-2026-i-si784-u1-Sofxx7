@@ -49,6 +49,34 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Automaticaly Seed Admin User on Startup
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<TournamentDbContext>();
+    context.Database.EnsureCreated(); // Asegura que la DB exista
+    
+    var adminUser = context.Users.FirstOrDefault(u => u.Email == "admin@tournament.com");
+    if (adminUser == null)
+    {
+        context.Users.Add(new TournamentApp.Domain.Entities.User
+        {
+            Id = Guid.NewGuid(),
+            Username = "Admin",
+            Email = "admin@tournament.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+            Role = TournamentApp.Domain.Enums.Role.Admin
+        });
+        context.SaveChanges();
+    }
+    else
+    {
+        // Fuerza la contraseña por si la cambiaste
+        adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
+        adminUser.Role = TournamentApp.Domain.Enums.Role.Admin;
+        context.SaveChanges();
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -56,7 +84,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // <-- Comentado para evitar errores de Red/CORS en local
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
