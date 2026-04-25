@@ -37,9 +37,6 @@ jobs:
           @enduml
           EOF
       - name: Generate SVG Diagram
-        uses: grassedge/generate-plantuml-action@v1.6
+        uses: docker://plantuml/plantuml:latest
         with:
-          path: docs/classes.puml
-          message: "Render PlantUML Diagram"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          args: -tsvg docs/classes.puml -o /tmp

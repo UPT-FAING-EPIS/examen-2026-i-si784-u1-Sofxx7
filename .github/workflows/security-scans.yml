@@ -21,13 +21,17 @@ jobs:
       - name: Install SonarCloud scanner
         run: dotnet tool install --global dotnet-sonarscanner
       - name: Build and analyze
+        if: secrets.SONAR_TOKEN != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-sonarscanner begin /k:"tournament-app" /o:"tu-org" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet-sonarscanner begin /k:"tournament-app" /o:"tu-org" /d:sonar.token="${{ env.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build backend/TournamentApp.sln
-          dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}" || echo "SonarCloud needs token configuration"
+          dotnet-sonarscanner end /d:sonar.token="${{ env.SONAR_TOKEN }}"
+      - name: Build only (without SonarCloud)
+        if: secrets.SONAR_TOKEN == ''
+        run: dotnet build backend/TournamentApp.sln
 
   semgrep:
     name: Semgrep Scan
